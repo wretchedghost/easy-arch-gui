@@ -1,0 +1,429 @@
+#--------------------------------------------------------------INITIAL SETS
+
+# set the mod key to the winkey:
+set $mod mod4
+
+# Needed for i3-gaps
+for_window [class="^.*"] border pixel 5
+
+default_border normal 2 px
+default_floating_border normal 2 px
+workspace_layout default
+title_align center
+focus_follows_mouse yes
+# Use Left-Click+$mod to drag floating windows to their wanted position
+# Right-Click+$mod to resize windows
+floating_modifier $mod
+force_focus_wrapping no
+font pango: Noto Sans Regular, FontAwesome, Monoid Mono 12
+floating_maximum_size 1920 x 1080
+floating_minimum_size 85 x 85
+popup_during_fullscreen smart
+force_display_urgency_hint 1000 ms
+focus_on_window_activation urgent
+workspace_auto_back_and_forth yes
+
+hide_edge_borders none
+
+show_marks yes
+
+#---------------------------------------------------------STARTUP PROGRAMS
+
+exec --no-startup-id /usr/bin/nm-applet
+#exec --no-startup-id blueberry-tray
+exec --no-startup-id /usr/bin/xfce4-climpan       # Clipboard
+exec --no-startup-id sleep 7 && /usr/bin/thunderbird
+exec --no-startup-id /usr/bin/numlockx
+exec --no-startup-id /usr/bin/picom -cbCf
+exec --no-startup-id /usr/bin/dunst
+exec --no-startup-id /usr/bin/volumeicon 
+exec --no-startup-id /usr/bin/caffeine-ng
+exec --no-startup-id $HOME/.fehbg
+exec --no-startup-id /usr/bin/redshift
+#exec --no-startup-id sleep 10 && /usr/bin/anydesk
+exec --no-startup-id /usr/bin/conky -d -c $HOME/.config/i3/conky/conky-left
+exec --no-startup-id $HOME/.screenlayout/work.sh
+
+# runs notify-send in critcal mode and stays up for 10 seconds (10000 mili)
+exec /usr/bin/xautolock -detectsleep -time 10 -locker "$HOME/.config/i3/scripts/lock_and_blur.sh" \
+	-notify 30 \
+	-notifier "notify-send -u critical -t 10000 -- 'locking screen in 30 seconds'" \
+	-notify 10 \
+	-notifier "notify-send -u critical -t 5000 -- 'locking screen in 10 seconds'"
+
+# autotiling script
+# This command allows for new opened windows to be predetermied to open at a certain size ratio and can be set to only work on certain windows.
+# https://github.com/nwg-piotr/autotiling
+# yay -S autotiling or autotiling-rs
+exec_always --no-startup-id autotiling -w 1 3 -sw .6 -sh .6
+
+#----------------------------------------------------------------SCRATCHPAD
+
+bindsym $mod+minus move scratchpad 
+bindsym $mod+plus scratchpad show
+
+#-------------------------------------------------------------MAIN BINDINGS
+
+gaps inner 10
+gaps outer 5
+
+#--------------------------------------------------------------GAPS SECTION
+
+bindsym $mod+a focus parent
+bindsym $mod+Shift+space floating toggle
+bindsym $mod+space focus mode_toggle
+bindsym $mod+Shift+c reload 
+bindsym $mod+Shift+r restart
+bindsym $mod+Shift+e exec "/usr/bin/i3-nagbar -t warning -m 'You pressed the exit shortcut. This will end your X session.' \
+    -b 'Yes, exit i3' 'i3-msg exit'"
+bindsym $mod+Shift+Escape	exec --no-startup-id prompt "Exit i3?" \
+    "i3-msg exit"
+bindsym $mod+Shift+s sticky toggle
+bindsym $mod+Shift+q kill
+bindsym $mod+Shift+F11 fullscreen toggle
+bindsym $mod+s layout stacking
+bindsym $mod+w layout toggle tabbed splith
+bindsym $mod+e layout toggle split 
+bindsym $mod+semicolon split h;exec /usr/bin/notify-send 'tile horizontally'
+bindsym $mod+v split v;exec /usr/bin/notify-send 'tile vertically'
+bindsym $mod+q split toggle; exec /usr/bin/notify-send 'tile toggle'
+
+#--------------------------------------------------------------RUN PROGRAMS
+
+#bindsym $mod+d exec --no-startup-id /usr/bin/rofi -show drun
+bindsym $mod+f exec --no-startup-id /usr/bin/firefox
+bindsym $mod+i exec --no-startup-id /usr/bin/urxvt -e /usr/bin/htop 
+bindsym $mod+m exec --no-startup-id /usr/bin/wine ~/Downloads/winbox64.exe -name WinBox
+bindsym $mod+n exec --no-startup-id /bin/bash ~/bin/visionclientlauncher/app/visionclientlauncher.sh
+bindsym $mod+b exec --no-startup-id /bin/bash ~/bin/designerlauncher/app/designerlauncher.sh
+bindsym $mod+p exec --no-startup-id $HOME/.config/i3/scripts/promote-window
+bindsym $mod+x exec --no-startup-id $HOME/.config/i3/scripts/lock_and_blur.sh
+bindsym $mod+Shift+comma exec --no-startup-id /usr/bin/autorandr mobile 
+bindsym $mod+Shift+period exec --no-startup-id /usr/bin/autorandr work
+bindsym $mod+F3 exec --no-startup-id /usr/bin/pcmanfm 
+bindsym $mod+F12 exec --no-startup-id /usr/bin/brightnessctl --output DP-4 set +20%
+bindsym $mod+F11 exec --no-startup-id /usr/bin/brightnessctl --output DP-4 set -20%
+
+# Take a screenshot with scrot
+bindsym $mod+F10 --release exec --no-startup-id /usr/bin/scrot -d 5; exec notify-send 'Taking a screenshot. 5 second timer'
+bindsym $mod+Shift+F10 --release exec --no-startup-id /usr/bin/scrot -d 5 -s; exec notify-send 'Select a window. 5 second timer.'
+bindsym Print exec /usr/bin/scrot ~/Pictures/%Y%m%d-screenshot.png && notify-send 'Screenshot saved to ~/Pictures/$("date +%Y%m%d")-screenshot.png'
+
+bindsym $mod+Return exec --no-startup-id /usr/bin/urxvt
+bindsym $mod+Shift+Return exec --no-startup-id /usr/bin/urxvt -name term
+
+# volume
+#bindsym XF86AudioRaiseVolume exec amixer -D pulse sset Master 5%+ && pkill -RTMIN+1 i3blocks
+#bindsym XF86AudioLowerVolume exec amixer -D pulse sset Master 5%- && pkill -RTMIN+1 i3blocks
+
+# Granular Volume Control
+#bindsym $mod+XF86AudioRaiseVolume exec amixer -D pulse sset Master 1%+ && pkill -RTMIN+1 i3blocks
+#bindsym $mod+XF86AudioLowerVolume exec amixer -D pulse sset Master 1%- && pkill -RTMIN+1 i3blocks
+
+# Mute
+#bindsym XF86AudioMute exec amixer sset Master toggle && killall -USR1 i3blocks
+
+# Backlight control
+bindsym XF86MonBrightnessUp exec /usr/bin/xbacklight +5 && notify-send "Brightness - $(xbacklight -get | cut -c1-2)%
+bindsym XF86MonBrightnessDown exec /usr/bin/xbacklight -5 && notify-send "Brightness - $(xbacklight -get | cut -c1-2)%
+
+# Caps Indicator 
+bindsym --release Caps_Lock exec pkill -SIGRTMIN+11 i3blocks
+bindsym --release Num_Lock exec pkill -SIGRTMIN+11 i3blocks
+
+bindsym XF86AudioRaiseVolume exec amixer -q set Master 5%+ unmute
+bindsym XF86AudioLowerVolume exec amixer -q set Master 5%- unmute
+bindsym XF86AudioMute exec amixer -D pulse set Master 1+ toggle
+
+# Open new empty workspace
+bindsym $mod+Shift+n exec $HOME/.config/i3/scripts/empty_workspace
+
+# Power Profile menu switch (rofi)
+bindsym $mod+Shift+t exec ~/.config/i3/scripts/power-profiles
+
+# exit-menu
+bindsym $mod+Shift+g exec ~/.config/i3/scripts/powermenu
+
+# set powersavings for display:
+exec --no-startup-id xset s 480 dpms 600 600 600
+
+#-----------------------------------------------------------------FLOATING WINDOWS
+
+for_window [class="Pavucontrol" instance="pavucontrol"] floating enable
+for_window [class="Nm-connection-editor" instance="nm-connection-editor"] floating enable
+for_window [class="Galculator"] floating enable border pixel 1
+for_window [title="File Transfer"] floating enable
+for_window [class="Blueberry.py" instance="blueberry.py"] floating enable
+for_window [class="Bluetooth-sendto" instance="bluetooth-sendto"] floating enable
+for_window [class="com-inductiveautomation-ignition-client-launch-BootstrapSwing" instance="com-inductiveautomation-ignition-client-launch-BootstrapSwing"] floating enable
+for_window [window_role="About"] floating enable
+for_window [class="Pcmanfm"] floating enable move position right
+    for_window [class="Pcmanfm"] resize set 900 700
+for_window [class="Thunar"] floating enable move position right
+    for_window [class="Thunar"] resize set 900 700
+for_window [class="feh"] floating enable move position right
+    for_window [class="feh"] resize set 820 640
+for_window [class="org.gnome.Nautilus"] floating enable move position right
+    for_window [class="org.gnome.Nautilus"] resize set 900 700
+for_window [class="Lxappearance"] floating enable stick enable border normal
+for_window [class="Arandr"] floating enable
+    for_window [class="Arandr"] resize set 640 480
+for_window [class="(?i)gsimplecal"] floating enable, move position mouse, move down 28 px
+for_window [title="term"] floating enable move position center
+for_window [class="(?i)wego"] floating enable, move position mouse, move down 28 px
+for_window [title="term"] floating enable move position center
+    for_window [title="term"] resize set 900 40
+for_window [title="^WinBox"] floating enable
+    for_window [title="^WinBox"] resize set 800 500
+#for_window [class="Yad"] floating enable
+
+# Sticky floating windows. Only takes effect if the windows is floating
+for_window [instance="^URxvt"] sticky enable
+for_window [class="Brave*"] sticky enable
+for_window [class="(?i)firefox*"] sticky enable
+for_window [class="^org.remmina.Remmina"] sticky enable
+for_window [class="Thunar"] sticky enable
+for_window [class="Pcmanfm"] sticky enable
+for_window [class="org.gnome.Nautilus"] sticky enable
+for_window [class="^Arandr"] sticky enable
+for_window [title="^WinBox"] sticky enable
+
+#------------------------------------------------------------WORKSPACE ASSIGNMENT
+
+set $ws1 "1:"
+set $ws2 "2:"
+set $ws3 "3:"
+set $ws4 "4:"
+set $ws5 "5:"
+set $ws6 "6:"
+set $ws7 "7:"
+set $ws8 "8:"
+set $ws9 "9:"
+set $ws10 "10:"
+
+workspace "1:" output DP-4
+workspace "2:" output DP-4
+
+workspace "3:" output DP-5
+workspace "7:" output DP-5
+workspace "8:" output DP-5
+workspace "9:" output DP-5
+workspace "10:" output DP-5
+
+# Open applications on specific workspaces 
+assign [class="Brave"] $ws1
+assign [class="(?i)firefox"] $ws1
+assign [class="Pale Moon"] $ws1
+assign [class="Midori"] $ws1
+assign [class="(?i)thunderbird"] $ws3
+assign [class="Signal"] $ws4
+assign [class="Steam"] $ws5
+#assign [class="org.remmina.Remmina"] $ws6
+assign [class="Libreoffice-*"] $ws6
+assign [class="Manuskript"] $ws6
+assign [class="Obsidian"] $ws6
+assign [class="Gimp-*"] $ws7
+assign [class="Spotify*"] $ws8
+assign [class="TeamViewer"] $ws9
+assign [class="Anydesk"] $ws9
+assign [class="com-inductive*"] $ws10
+
+#--------------------------------------------------------------------WINDOW FOCUS
+
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+
+bindsym $mod+Left focus left
+bindsym $mod+Right focus right
+bindsym $mod+Up focus up
+bindsym $mod+Down focus down 
+
+bindsym $mod+Shift+h move left 10 px
+bindsym $mod+Shift+j move down 10 px
+bindsym $mod+Shift+k move up 10 px
+bindsym $mod+Shift+l move right 10 px
+
+for_window [class="Brave*"] focus
+for_window [class="(?i)firefox*"] focus
+for_window [class="(?i)firefox"] title_format "<span foreground='red'>%title</span>" 		# print window title of firefox windows red
+#for_window [class="Signal"] focus
+for_window [class="Manuskript"] focus
+#for_window [class="TeamViewer"] focus
+#for_window [class="Spotify*"] focus
+#for_window [class="org.remmina.Remmina"] focus
+#for_window [class="Gimp-*"] focus
+#for_window [class="com-inductive*"] focus
+for_window [class=".*"] title_format "<b>%title</b>" 	# print all window title in bold
+
+#-----------------------------------------------------------------WINDOW SPLITTING
+
+bindsym $mod+apostrophe split horizontal 
+bindsym $mod+slash split vertical 
+bindsym $mod+backslash workspace back_and_forth
+
+#---------------------------------------------------------------CONTAINER MOVEMENT
+
+bindsym $mod+1 workspace $ws1
+bindsym $mod+2 workspace $ws2
+bindsym $mod+3 workspace $ws3
+bindsym $mod+4 workspace $ws4
+bindsym $mod+5 workspace $ws5
+bindsym $mod+6 workspace $ws6
+bindsym $mod+7 workspace $ws7
+bindsym $mod+8 workspace $ws8
+bindsym $mod+9 workspace $ws9
+bindsym $mod+0 workspace $ws10
+
+#--------------------------------------------------------------WORKSPACE SWITCHING
+
+bindsym $mod+Shift+1 move container to workspace $ws1
+bindsym $mod+Shift+2 move container to workspace $ws2
+bindsym $mod+Shift+3 move container to workspace $ws3
+bindsym $mod+Shift+4 move container to workspace $ws4
+bindsym $mod+Shift+5 move container to workspace $ws5
+bindsym $mod+Shift+6 move container to workspace $ws6
+bindsym $mod+Shift+7 move container to workspace $ws7
+bindsym $mod+Shift+8 move container to workspace $ws8
+bindsym $mod+Shift+9 move container to workspace $ws9
+bindsym $mod+Shift+0 move container to workspace $ws10
+
+#------------------------------------------------------------------WINDOW RESIZING
+
+bindsym $mod+r 				mode "resize"
+mode "resize" {
+        bindsym h resize shrink width 50 px or 50 ppt
+        bindsym j resize grow height 50 px or 50 ppt
+        bindsym k resize shrink height 50 px or 50 ppt
+        bindsym l resize grow width 50 px or 50 ppt
+
+        bindsym Left resize shrink width 10 px or 10 ppt
+        bindsym Down resize grow height 10 px or 10 ppt
+        bindsym Up resize shrink height 10 px or 10 ppt
+        bindsym Right resize grow width 10 px or 10 ppt
+
+        bindsym Return mode "default"
+        bindsym Escape mode "default"
+        bindsym $mod+r mode "default"
+}
+
+# Dynamic screen resizing
+bindsym $mod+Shift+u exec --no-startup-id ~/.config/i3/scripts/i3resize.sh left
+bindsym $mod+Shift+i exec --no-startup-id ~/.config/i3/scripts/i3resize.sh down
+bindsym $mod+Shift+o exec --no-startup-id ~/.config/i3/scripts/i3resize.sh up
+bindsym $mod+Shift+p exec --no-startup-id ~/.config/i3/scripts/i3resize.sh right
+
+#-------------------------------------------------------------------GROUP ACTIONS
+
+# I don't know what I want to use this for just yet but its here for reference
+#bindsym $mod+F8 [class="^URxvt$"] kill
+
+#---------------------------------------------------------------------MISC WINDOWS
+
+for_window [window_role="popup"] floating enable
+for_window [class=".*"] border pixel 4
+for_window [class="Links$" title="^Links$"] floating enable
+for_window [title="Event Tester$" id="0x1000001"] floating enable
+
+#--------------------------------------------------------------------BRAVE WINODWS
+
+# A work in progress. 
+# I want to setup all popups from brave to always go to workspace 1
+#for_window [class="(?i)brave-browser"] floating disabled, move container to workspace 1
+
+#--------------------------------------------------------------THUNDERBIRD WINODWS
+
+for_window [class="Thunderbird$" title=" ? Mozilla Thunderbird$"] floating disabled, move container to workspace 3
+for_window [class="Thunderbird$" title="Sending Message - Re:.*$"] floating enable, move container to workspace 3
+
+#--------------------------------------------------------------TERMINOLOGY WINDOWS
+
+for_window [class="^terminology$"] floating disabled
+
+#---------------------------------------------------------------------GIMP WINDOWS
+
+for_window [class="Gimp$" title="GNU Image Manipulation Program$"] floating disabled
+for_window [class="Gimp$" title=" ? GIMP$"] floating disabled
+for_window [class="Gimp$" title="Tool Options$"] floating enable
+for_window [class="Gimp$" title="Quit GIMP$"] floating enable
+
+#---------------------------------------------------------------------------STEAM
+
+for_window [class="Steam$"] floating disabled
+for_window [class="Steam$" title=" - Steam$"] floating enable
+for_window [class="Steam$" title="About Steam$"] floating enable
+for_window [class="Steam$" title="Add a Game$"] floating enable
+for_window [class="Steam$" title="Create or select new Steam library folder:$"] floating enable
+for_window [class="Steam$" title="Friends List$"] floating enable
+for_window [class="Steam$" title="Install - "] floating enable
+for_window [class="Steam$" title="Product Activation$"] floating enable
+for_window [class="Steam$" title="Properties - "] floating enable
+for_window [class="Steam$" title="Settings$"] floating enable
+for_window [class="Steam$" title="Steam - Error$"] floating enable
+for_window [class="Steam$" title="Steam - News "] floating enable
+for_window [class="Steam$" title="Steam Library Folders$"] floating enable
+for_window [class="Steam$" title="Validating Steam files - "] floating enable
+
+#--------------------------------------------------------------LINKS2
+
+for_window [class="^Links$" title="^Links - "] floating enable
+
+#--------------------------------------------------------------THEME COLORS
+
+# class                         border  backgr. text    indic.  child_border
+client.focused			        #5d12b3 #5d12b3 #ededed #7b7d7d #7b7d7d
+#client.focused			        #d9d9d9 #cecece #000000 #d9d9d9 #d9d9d9
+client.focused_inactive	        #111111	#111111 #dddddd #111111 #111111
+client.unfocused               #222222 #000000 #555555 #222222 #222222
+client.urgent			        #3B89B5	#3B89B5 #a5a5a5 #85678F
+client.placeholder              #222222 #000000 #000000 #222222 #222222
+
+client.background		        #1A1A1A
+
+#--------------------------------------------------------------BAR OPTIONS
+
+# Single screen
+bar {
+	position top
+	output primary
+	output DP-4
+        status_command /usr/bin/i3blocks -c ~/.config/i3/i3blocks/i3blocks
+        tray_output DP-4
+        tray_padding 2
+		colors {
+		    background #333333 # menubar color
+		    #statusline #bdbdbd # menubar color
+		    statusline #f9faf9 # menubar color
+		    separator #454947
+
+		    #		          border  backgr. text			 
+		    focused_workspace #5d12b3 #5d12b3 #ededed
+		    urgent_workspace #953553 #953554 #ededed
+	}
+}
+
+bar {
+	position top
+	output DP-5
+        #status_command /usr/bin/i3blocks -c ~/.config/i3/i3blocks/i3blocks
+        status_command /usr/bin/i3blocks -c ~/.config/i3/i3blocks/i3blocks_alt
+		colors {
+			background #111111
+	}
+}
+
+#-----------------------------------------------------------------TESTING
+
+# FOR TESTING
+#bindsym $mod+F12 exec "notify-send Hello, i3"
+#bindsym $mod+F12 exec "notify-send \\"Hello, i3; from $USER\\""
+#!/bin/sh
+
+#-----------------------------------------------------------------ROFI
+
+#####################################
+# Application menu handled by rofi: #
+#####################################
+
+bindsym $mod+d exec rofi -modi drun -show drun -config ~/.config/rofi/rofidmenu.rasi
