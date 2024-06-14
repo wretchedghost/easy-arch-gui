@@ -246,16 +246,6 @@ keyboard_selector () {
     esac
 }
 
-yayinstall() { 
-    cd /opt
-    git clone https://aur.archlinux.org/yay-git
-    chown -R $username:$username ./yay-git
-    cd yay-git 
-    su $username
-    makepkg -si 
-    return # used to exit the function and not the script due to needing to switch to non root user
-}
-
 # Welcome screen.
 echo -ne "${BOLD}${BYELLOW}
 =============================================================================================================
@@ -362,7 +352,7 @@ mount "$ESP" /mnt/boot/
 microcode_detector
 
 # Setup the swapfile
-info_print "Setting up a swapfile. What size do you want in MB? (ie 16384 = 16G, 24576 = 24G, or 32768 = 32G)"
+info_print "Setting up a swapfile. What size do you want in MB? (ie 24576 = 24G or 32768 = 32G)"
 sleep 1s
 while :; do
     read -ep 'Swapfile Size: ' swap_response
@@ -380,7 +370,7 @@ swapon /mnt/.swapfile
 # Pacstrap (setting up a base sytem onto the new root).
 info_print "Installing the base system (this may take a while)."
 sleep 3s
-pacstrap -K /mnt base "$kernel" "$microcode" linux-firmware "$kernel"-headers grub rsync efibootmgr sudo vim git neofetch screefetch bash-completion 
+pacstrap -K /mnt base "$kernel" "$microcode" linux-firmware "$kernel"-headers grub rsync efibootmgr sudo vim git neofetch bash-completion 
 
 # Setting up the hostname.
 echo "$hostname" > /mnt/etc/hostname
@@ -461,29 +451,46 @@ if [[ -n "$username" ]]; then
     echo "$username:$userpass" | arch-chroot /mnt chpasswd
 fi
 
-# Pacman eye-candy features and multilib.
+# Pacman eye-candy features.
 info_print "Enabling colors, animations, and parallel downloads for pacman."
 sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/' /mnt/etc/pacman.conf
 
-printf '[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /mnt/etc/pacman.conf
+info_print "Let's install all the things to get i3 working."
 
-pacman -Sy xorg-server xorg-xinit openssh curl wget zip unzip urxvt-perls i3-wm i3lock i3blocks lxappearance scrot picom feh dunst rofi conky ranger gsimplecal galculator xfce4-clipman arandr voluemicon xautolock imagemagick ttf-font-awesome ttf-dejavu firefox thunar gvfs gvfs-smb gvfs-mtp gvfs-mtp wine thunderbird barrier pavucontrol lightdm-slick-greeter android-tools cups cifs ntfs-3g nfs-utils neomutt
+pacman -S --noconfirm - < pkglist.txt
 
-# Pull configs from git.
-cd $username
-git clone https://git.wretchednet.com/wretchedghost/i3-wretchedbox
-cd i3-wretchedbox
-rsync -av .bashrc .fehbg Pictures .tmux.conf .vim .vimrc .xinitrc .Xresources /home/$username/
-cd .config
-mkdir /home/$username/.config
-rsync -av dunst i3 neomutt newsboat ranger redshift rofi /home/$username/.config/
+# Switch to installed non-root user since yay does not like installing with root.
+su $username
+cd ~/
+if [ -x "$(command -v yay)" ]; then
+    print "Found yay install"
+else
+    print "Will install yay now."
+    git clone https://aur.archlinux/yay.git
+    cd yay
+    makepgk -fsri
+    cd ..
+    rm -rf yay/
+fi
 
-# Enable systemd services.
+pacman -S --noconfirm - < yaylist.txt
+
+# Switch back to root
+exit
+
+git clone https://git.wretchednet.com/wretchedghost/easy-arch-i3
+cd easy-arch-i3
 systemctl enable lightdm
-systemctl enable sshd
+cp background.jpg /usr/share/pixmaps/
+rm -rf /etc/lightdm/
+cp -R lightdm /etc/lightdm
 
-# yay install.
-until yayinstall; do : ; done 
+chown -R $username:$username ../easy-arch-i3-gui
+
+su $username
+rsync -av .bashrc .config .fehbg .tmux.conf .vim .vimrc .xinitrc .Xresources Pictures ~/
+
+info_print "Gui and i3 Linux have been setup now."
 
 # Finishing up.
 info_print "Done, you may now wish to reboot (further changes can be done by chrooting into /mnt)."
