@@ -6,7 +6,7 @@
 # Cleaning the TTY.
 clear
 
-# Cosmetics (colours for text).
+# Cosmetics (colors for text).
 BOLD='\e[1m'
 BRED='\e[91m'
 BBLUE='\e[34m'  
@@ -34,23 +34,23 @@ virt_check () {
     hypervisor=$(systemd-detect-virt)     
     case $hypervisor in         
         kvm )   info_print "KVM has been detected, setting up guest tools."                 
-            pacstrap /mnt qemu-guest-agent &> /dev/null                 
-            systemctl enable qemu-guest-agent --root=/mnt &> /dev/null                 
+            pacstrap /mnt qemu-guest-agent &>/dev/null                 
+            systemctl enable qemu-guest-agent --root=/mnt &>/dev/null                 
             ;;         
         vmware  )   info_print "VMWare Workstation/ESXi has been detected, setting up guest tools."                     
-            pacstrap /mnt open-vm-tools > /dev/null                     
-            systemctl enable vmtoolsd --root=/mnt &> /dev/null                     
-            systemctl enable vmware-vmblock-fuse --root=/mnt &> /dev/null                     
+            pacstrap /mnt open-vm-tools >/dev/null                     
+            systemctl enable vmtoolsd --root=/mnt &>/dev/null                     
+            systemctl enable vmware-vmblock-fuse --root=/mnt &>/dev/null                     
             ;;         
         oracle )    info_print "VirtualBox has been detected, setting up guest tools."                     
-            pacstrap /mnt virtualbox-guest-utils &> /dev/null                     
-            systemctl enable vboxservice --root=/mnt &> /dev/null                     
+            pacstrap /mnt virtualbox-guest-utils &>/dev/null                     
+            systemctl enable vboxservice --root=/mnt &>/dev/null                     
             ;;         
         microsoft ) info_print "Hyper-V has been detected, setting up guest tools."                     
-            pacstrap /mnt hyperv &> /dev/null                     
-            systemctl enable hv_fcopy_daemon --root=/mnt &> /dev/null                     
-            systemctl enable hv_kvp_daemon --root=/mnt &> /dev/null                     
-            systemctl enable hv_vss_daemon --root=/mnt &> /dev/null                     
+            pacstrap /mnt hyperv &>/dev/null                     
+            systemctl enable hv_fcopy_daemon --root=/mnt &>/dev/null                     
+            systemctl enable hv_kvp_daemon --root=/mnt &>/dev/null                     
+            systemctl enable hv_vss_daemon --root=/mnt &>/dev/null                     
             ;;     
     esac 
 }
@@ -99,21 +99,21 @@ network_selector () {
 network_installer () {
     case $network_choice in
         1 ) info_print "Installing and enabling IWD."
-            pacstrap /mnt iwd > /dev/null
-            systemctl enable iwd --root=/mnt &> /dev/null
+            pacstrap /mnt iwd >/dev/null
+            systemctl enable iwd --root=/mnt &>/dev/null
             ;;
         2 ) info_print "Installing and enabling NetworkManager."
-            pacstrap /mnt networkmanager > /dev/null
-            systemctl enable NetworkManager --root=/mnt &> /dev/null
+            pacstrap /mnt networkmanager >/dev/null
+            systemctl enable NetworkManager --root=/mnt &>/dev/null
             ;;
         3 ) info_print "Installing and enabling wpa_supplicant and dhcpcd."
-            pacstrap /mnt wpa_supplicant dhcpcd > /dev/null
-            systemctl enable wpa_supplicant --root=/mnt &> /dev/null
-            systemctl enable dhcpcd --root=/mnt &> /dev/null
+            pacstrap /mnt wpa_supplicant dhcpcd >/dev/null
+            systemctl enable wpa_supplicant --root=/mnt &>/dev/null
+            systemctl enable dhcpcd --root=/mnt &>/dev/null
             ;;
         4 ) info_print "Installing dhcpcd."
-            pacstrap /mnt dhcpcd > /dev/null
-            systemctl enable dhcpcd --root=/mnt &> /dev/null
+            pacstrap /mnt dhcpcd >/dev/null
+            systemctl enable dhcpcd --root=/mnt &>/dev/null
     esac
 }
 
@@ -246,25 +246,26 @@ keyboard_selector () {
     esac
 }
 
-yayinstall() {
-    
+yayinstall() { 
     cd /opt
     git clone https://aur.archlinux.org/yay-git
     chown -R $username:$username ./yay-git
-    cd yay-git
-    makepkg -si
+    cd yay-git 
+    su $username
+    makepkg -si 
+    return # used to exit the function and not the script due to needing to switch to non root user
 }
 
 # Welcome screen.
 echo -ne "${BOLD}${BYELLOW}
-======================================================================
-███████╗ █████╗ ███████╗██╗   ██╗      █████╗ ██████╗  ██████╗██╗  ██╗
-██╔════╝██╔══██╗██╔════╝╚██╗ ██╔╝     ██╔══██╗██╔══██╗██╔════╝██║  ██║
-█████╗  ███████║███████╗ ╚████╔╝█████╗███████║██████╔╝██║     ███████║
-██╔══╝  ██╔══██║╚════██║  ╚██╔╝ ╚════╝██╔══██║██╔══██╗██║     ██╔══██║
-███████╗██║  ██║███████║   ██║        ██║  ██║██║  ██║╚██████╗██║  ██║
-╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝        ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
-======================================================================
+=============================================================================================================
+███████╗ █████╗ ███████╗██╗   ██╗      █████╗ ██████╗  ██████╗██╗  ██╗      ███████╗██╗  ██╗████████╗██╗  ██╗
+██╔════╝██╔══██╗██╔════╝╚██╗ ██╔╝     ██╔══██╗██╔══██╗██╔════╝██║  ██║      ██╔════╝╚██╗██╔╝╚══██╔══╝██║  ██║
+█████╗  ███████║███████╗ ╚████╔╝█████╗███████║██████╔╝██║     ███████║█████╗█████╗   ╚███╔╝    ██║   ███████║
+██╔══╝  ██╔══██║╚════██║  ╚██╔╝ ╚════╝██╔══██║██╔══██╗██║     ██╔══██║╚════╝██╔══╝   ██╔██╗    ██║   ╚════██║
+███████╗██║  ██║███████║   ██║        ██║  ██║██║  ██║╚██████╗██║  ██║      ███████╗██╔╝ ██╗   ██║        ██║
+╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝        ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝      ╚══════╝╚═╝  ╚═╝   ╚═╝        ╚═╝
+=============================================================================================================
 ${RESET}"
 info_print "Welcome to easy-arch, a script made in order to simplify the process of installing Arch Linux."
 info_print "This script must be run on an EFI system. BIOS will not work. Checking now..."
@@ -276,6 +277,7 @@ else
     echo "System is running in BIOS mode. Script will close now."
     exit 0
 fi
+
 
 # Setting up keyboard layout.
 until keyboard_selector; do : ; done
@@ -299,13 +301,13 @@ until lukspass_selector; do : ; done
 # Setting up the kernel.
 until kernel_selector; do : ; done
 
-# User chooses the network.
+# User choses the network.
 until network_selector; do : ; done
 
-# User chooses the locale.
+# User choses the locale.
 until locale_selector; do : ; done
 
-# User chooses the hostname.
+# User choses the hostname.
 until hostname_selector; do : ; done
 
 # User sets up the user/root passwords.
@@ -320,8 +322,8 @@ if ! [[ "${disk_response,,}" =~ ^(yes|y)$ ]]; then
     exit
 fi
 info_print "Wiping $DISK."
-wipefs -af "$DISK" &> /dev/null
-sgdisk -Zo "$DISK" &> /dev/null
+wipefs -af "$DISK" &>/dev/null
+sgdisk -Zo "$DISK" &>/dev/null
 
 # Creating a new partition scheme.
 info_print "Creating the partitions on $DISK."
@@ -340,45 +342,45 @@ partprobe "$DISK"
 
 # Formatting the ESP as FAT32.
 info_print "Formatting the EFI Partition as vFAT32."
-mkfs.vfat -F32 "$ESP" &> /dev/null
+mkfs.vfat -F32 "$ESP" &>/dev/null
 
 # Creating a LUKS Container for the root partition.
 info_print "Creating LUKS Container for the root partition."
-echo -n "$password" | cryptsetup luksFormat "$CRYPTROOT" -d - &> /dev/null
+echo -n "$password" | cryptsetup luksFormat "$CRYPTROOT" -d - &>/dev/null
 echo -n "$password" | cryptsetup open "$CRYPTROOT" cryptroot -d - 
 fs_ext4="/dev/mapper/cryptroot"
 
 # Formatting the LUKS Container as EXT4.
 info_print "Formatting the LUKS container as EXT4."
-mkfs.ext4 "$fs_ext4" &> /dev/null
+mkfs.ext4 "$fs_ext4" &>/dev/null
 mount "$fs_ext4" /mnt
 
 mkdir /mnt/boot
 mount "$ESP" /mnt/boot/
 
+# Checking the microcode to install.
+microcode_detector
+
 # Setup the swapfile
-#info_print "Setting up a swapfile. What size do you want in MB? (ie 24576 = 24G or 32768 = 32G)"
-info_print "Setting up a swapfile. Setting size to 2GB."
-#read -r swap_response}
-#if ! [[ "${swap_response,,}" ~= '^[0-9]+$''^[0-9]+$''^[0-9]+$''^[0-9]+$''^[0-9]+$' ...];then #### Need to find solution to this part
-#error_print "Quitting."
-#    exit
-#fi
+info_print "Setting up a swapfile. What size do you want in MB? (ie 16384 = 16G, 24576 = 24G, or 32768 = 32G)"
+sleep 1s
+while :; do
+    read -ep 'Swapfile Size: ' swap_response
+    [[ $swap_response =~ ^[[:digit:]]+$ ]] || continue
+    (( ( (swap_response=(10#$swap_response)) <= 99999 ) && swap_response >= 0 )) || continue
+    break
+done
 
 #dd if=/dev/zero of=/mnt/.swapfile bs=1M count=$swap_response status=progress
-dd if=/dev/zero of=/mnt/.swapfile bs=1M count=2048 status=progress
+dd if=/dev/zero of=/mnt/.swapfile bs=1M count=$swap_response status=progress
 chmod 600 /mnt/.swapfile
 mkswap /mnt/.swapfile
 swapon /mnt/.swapfile
 
-# Checking the microcode to install.
-microcode_detector
-
 # Pacstrap (setting up a base sytem onto the new root).
 info_print "Installing the base system (this may take a while)."
 sleep 3s
-#pacstrap /mnt base "$kernel" "$microcode" linux-firmware "$kernel"-headers grub rsync efibootmgr sudo vim git neofetch networkmanager bash-completion &> /dev/null
-pacstrap /mnt base "$kernel" "$microcode" linux-firmware "$kernel"-headers grub rsync efibootmgr sudo vim git neofetch bash-completion 
+pacstrap -K /mnt base "$kernel" "$microcode" linux-firmware "$kernel"-headers grub rsync efibootmgr sudo vim git neofetch screefetch bash-completion 
 
 # Setting up the hostname.
 echo "$hostname" > /mnt/etc/hostname
@@ -388,7 +390,7 @@ info_print "Generating a new fstab."
 genfstab -U /mnt >> /mnt/etc/fstab
 
 # Setup tmpfs in /mnt/etc/fstab.
-info_print "Generating a tmpfs with the size of 8G. This size can be changed at anytime but please perform an reboot after the change to make sure things don't get wonky. noatime is disable as default as this is not preferred to have enabled with an NVMe drive. For a SSD you SHOULD enable noatime."
+info_print "Generating a tmpfs with the size of 8G. This size can be changed at anytime but please perform a reboot after the change to make sure things don't get wonky. noatime is disabled as default as this is not preferred to have enabled with an NVMe drive. For a SSD you SHOULD enable noatime."
 sleep 3s
 echo "tmpfs /tmp    tmpfs   rw,nodev,nosuid,size=8G,mode=1700 0 0" >> /mnt/etc/fstab
 
@@ -406,7 +408,7 @@ cat > /mnt/etc/hosts <<EOF
 EOF
 
 # Virtualization check.
-virt_check
+#virt_check
 
 # Setting up the network.
 network_installer
@@ -414,35 +416,35 @@ network_installer
 # Configuring /etc/mkinitcpio.conf.
 info_print "Configuring /etc/mkinitcpio.conf."
 cat > /mnt/etc/mkinitcpio.conf <<EOF
-HOOKS=(base udev autodetect keyboard modconf block encrypt filesystems)
+HOOKS=(base udev autodetect keyboard modconf block encrypt filesystems fsck)
 EOF
 
 # Setting up LUKS2 encryption in grub.
 info_print "Setting up grub config."
 UUID=$(blkid -s UUID -o value $CRYPTROOT)
-sed -i "\,^GRUB_CMDLINE_LINUX=\"\",s,\",&rd.luks.name=$UUID=cryptroot root=$fs_ext4," /mnt/etc/default/grub
+sed -i "\,^GRUB_CMDLINE_LINUX=\"\",s,\",&cryptdevice=UUID=$UUID:cryptroot," /mnt/etc/default/grub
 
 # Configuring the system.
 info_print "Configuring the system (timezone, system clock, initramfs, GRUB)."
-arch-chroot /mnt /bin/bash -e <<EOF
+arch-chroot /mnt /bin/bash -e << EOF
 
     # Setting up timezone.
-    ln -sf /usr/share/zoneinfo/$(curl -s http://ip-api.com/line?fields=timezone) /etc/localtime 
+    ln -sf /usr/share/zoneinfo/$(curl -s http://ip-api.com/line?fields=timezone) /etc/localtime &>/dev/null
 
     # Setting up clock.
     hwclock --systohc
 
     # Generating locales.
-    locale-gen 
+    locale-gen &>/dev/null
 
     # Generating a new initramfs.
-    mkinitcpio -P 
+    mkinitcpio -P &>/dev/null
 
     # Installing GRUB.
-    grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id=GRUB
+    grub-install --target=x86_64-efi --efi-directory=/boot/ --bootloader-id=ARCHLINUX &>/dev/null
 
     # Creating grub config file.
-    grub-mkconfig -o /boot/grub/grub.cfg
+    grub-mkconfig -o /boot/grub/grub.cfg &>/dev/null
 
 EOF
 
@@ -459,23 +461,29 @@ if [[ -n "$username" ]]; then
     echo "$username:$userpass" | arch-chroot /mnt chpasswd
 fi
 
-# Pacman eye-candy features.
-info_print "Enabling colours, animations, and parallel downloads for pacman."
+# Pacman eye-candy features and multilib.
+info_print "Enabling colors, animations, and parallel downloads for pacman."
 sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/' /mnt/etc/pacman.conf
 
-pacman -Sy xorg-server xorg-xinit openssh curl wget neofetch vim rsync git zip unzip urxvt-perls i3-wm i3lock i3blocks lxappearance scrot picom feh dunst rofi conky xfce4-clipman arandr voluemicon xautolock imagemagick ttf-bitstream-vera ttf-font-awesome ttf-dejavu ttf-monoid ttf-roboto ttf-ubuntu-font-family ttf-hack ttf-droid firefox midori pcmanfm gvfs gvfs-smb gvfs-mtp gvfs-mtp wine thunderbird barrier pipewire pipewire-alsa pipewire-pulse pavucontrol lightdm-slick-greeter android-tools cups cifs ntfs-3g nfs-utils 
+printf '[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /mnt/etc/pacman.conf
 
-# Optionals
-#pacman -Sy deluge libreoffice-still manuskript obsidian
+pacman -Sy xorg-server xorg-xinit openssh curl wget zip unzip urxvt-perls i3-wm i3lock i3blocks lxappearance scrot picom feh dunst rofi conky ranger gsimplecal galculator xfce4-clipman arandr voluemicon xautolock imagemagick ttf-font-awesome ttf-dejavu firefox thunar gvfs gvfs-smb gvfs-mtp gvfs-mtp wine thunderbird barrier pavucontrol lightdm-slick-greeter android-tools cups cifs ntfs-3g nfs-utils neomutt
 
-# Yay AUR install
-#until yayinstall; do : ; done
+# Pull configs from git.
+cd $username
+git clone https://git.wretchednet.com/wretchedghost/i3-wretchedbox
+cd i3-wretchedbox
+rsync -av .bashrc .fehbg Pictures .tmux.conf .vim .vimrc .xinitrc .Xresources /home/$username/
+cd .config
+mkdir /home/$username/.config
+rsync -av dunst i3 neomutt newsboat ranger redshift rofi /home/$username/.config/
 
-# AUR stuff
-#yay -S signal-browser-bin qtbrowser caffeine-ng blueberry firefox-profile-service spotify teamviewer downgrade
+# Enable systemd services.
+systemctl enable lightdm
+systemctl enable sshd
 
-# AUR Theme
-#yay -S vimix-icon-theme vimix vimix-gtk-themes vimix-cursors
+# yay install.
+until yayinstall; do : ; done 
 
 # Finishing up.
 info_print "Done, you may now wish to reboot (further changes can be done by chrooting into /mnt)."
