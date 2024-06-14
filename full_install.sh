@@ -467,7 +467,7 @@ sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/' /mnt/e
 
 printf '[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /mnt/etc/pacman.conf
 
-pacman -Sy xorg-server xorg-xinit openssh curl wget zip unzip urxvt-perls i3-wm i3lock i3blocks lxappearance scrot picom feh dunst rofi conky ranger gsimplecal galculator xfce4-clipman arandr voluemicon xautolock imagemagick ttf-font-awesome ttf-dejavu firefox thunar gvfs gvfs-smb gvfs-mtp gvfs-mtp wine thunderbird barrier pavucontrol lightdm-slick-greeter android-tools cups cifs ntfs-3g nfs-utils neomutt
+pacman -Sy xorg-server xorg-xinit xorg-xrandr arandr xorg-xkill xorg-xset openssh curl wget zip unzip urxvt-perls i3-wm i3lock i3blocks lxappearance scrot picom feh dunst rofi conky ranger gsimplecal galculator xfce4-clipman arandr voluemicon xautolock imagemagick ttf-font-awesome ttf-dejavu firefox thunar gvfs gvfs-smb gvfs-mtp gvfs-mtp wine thunderbird barrier pavucontrol lightdm-slick-greeter android-tools cups cifs ntfs-3g nfs-utils neomutt
 
 # Pull configs from git.
 cd $username
