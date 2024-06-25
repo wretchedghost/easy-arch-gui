@@ -380,7 +380,7 @@ swapon /mnt/.swapfile
 # Pacstrap (setting up a base sytem onto the new root).
 info_print "Installing the base system (this may take a while)."
 sleep 3s
-pacstrap -K /mnt base "$kernel" "$microcode" linux-firmware "$kernel"-headers grub rsync efibootmgr sudo vim git neofetch screefetch bash-completion 
+pacstrap -K /mnt base "$kernel" "$microcode" linux-firmware "$kernel"-headers grub rsync efibootmgr sudo vim git neofetch screenfetch bash-completion 
 
 # Setting up the hostname.
 echo "$hostname" > /mnt/etc/hostname
@@ -467,16 +467,19 @@ sed -Ei 's/^#(Color)$/\1\nILoveCandy/;s/^#(ParallelDownloads).*/\1 = 10/' /mnt/e
 
 printf '[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /mnt/etc/pacman.conf
 
-pacman -Sy xorg-server xorg-xinit xorg-xrandr arandr xorg-xkill xorg-xset openssh curl wget zip unzip urxvt-perls i3-wm i3lock i3blocks lxappearance scrot picom feh dunst rofi conky ranger gsimplecal galculator xfce4-clipman arandr voluemicon xautolock imagemagick ttf-font-awesome ttf-dejavu firefox thunar gvfs gvfs-smb gvfs-mtp gvfs-mtp wine thunderbird barrier pavucontrol lightdm-slick-greeter android-tools cups cifs ntfs-3g nfs-utils neomutt base-devel
+pacman -Syyu --noconfirm
+pacman -S --noconfirm xorg-server xorg-xinit xorg-xrandr arandr xorg-xkill xorg-xset openssh curl wget zip unzip urxvt-perls i3-wm i3lock i3blocks lxappearance scrot picom feh dunst rofi conky ranger gsimplecal galculator xfce4-clipman-plugin volumeicon xautolock imagemagick ttf-font-awesome ttf-dejavu firefox thunar gvfs gvfs-smb gvfs-mtp gvfs-nfs wine thunderbird barrier pavucontrol lightdm-slick-greeter android-tools cifs-utils ntfs-3g nfs-utils neomutt base-devel
 
 # Pull configs from git.
+su $username
 cd $username
 git clone https://git.wretchednet.com/wretchedghost/i3-wretchedbox
 cd i3-wretchedbox
-rsync -av .bashrc .fehbg Pictures .tmux.conf .vim .vimrc .xinitrc .Xresources /home/$username/
+rsync -a .bashrc .fehbg Pictures .tmux.conf .vim .vimrc .xinitrc .Xresources /home/$username/
 cd .config
 mkdir /home/$username/.config
-rsync -av dunst i3 neomutt newsboat ranger redshift rofi /home/$username/.config/
+rsync -a dunst i3 neomutt newsboat ranger redshift rofi /home/$username/.config/
+exit 1
 
 # Enable systemd services.
 systemctl enable lightdm
