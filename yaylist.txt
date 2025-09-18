@@ -1,4 +1,0 @@
-caffeine-ng
-blueberry
-downgrade
-vimix-icon-theme vimix vimix-gtk-themes vimix-cursors
