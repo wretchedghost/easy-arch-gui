@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# Enhanced Arch Linux Post-Installation Script
-# Installs GUI, applications, and user configurations
+# Minimal Arch Linux Post-Installation Script
+# Installs essential GUI components and system tools
 
 set -euo pipefail
 
@@ -90,34 +90,29 @@ install_yay() {
 
 # Install packages from official repositories
 install_official_packages() {
-    info_print "Updating system and installing official packages..."
+    info_print "Updating system and installing packages..."
     
     # Update system first
     sudo pacman -Syu --noconfirm
     
     # Core system packages
     local core_packages=(
-        # Display server and drivers
+        # Display server essentials
         "xorg-server"
         "xorg-xinit"
         "xorg-xrandr"
         "xorg-xset"
         "xorg-xkill"
         
-        # Graphics drivers (install common ones, user can remove unneeded)
+        # Basic graphics driver
         "mesa"
-        "xf86-video-intel"
-        "xf86-video-amdgpu"
-        "xf86-video-nouveau"
         
-        # Audio
+        # Audio (minimal setup)
         "pipewire"
         "pipewire-pulse"
         "pipewire-alsa"
-        "pipewire-jack"
         "wireplumber"
         "pavucontrol"
-        "volumeicon"
         
         # Window manager and desktop tools
         "i3-wm"
@@ -163,17 +158,16 @@ install_official_packages() {
         "nfs-utils"
         "sshfs"
         
-        # Development tools
-        "code"
-        "firefox"
+        # Development basics
         "git"
         "base-devel"
         
-        # Media and graphics
+        # Browser
+        "firefox"
+        
+        # Media basics (no players, just libraries)
         "imagemagick"
         "ffmpeg"
-        "vlc"
-        "gimp"
         
         # Fonts
         "ttf-dejavu"
@@ -198,7 +192,7 @@ install_official_packages() {
         fi
     done
     
-    info_print "Official packages installation completed"
+    info_print "Package installation completed"
 }
 
 # Install AUR packages
@@ -216,16 +210,10 @@ install_aur_packages() {
         "vimix-icon-theme"
         "vimix-cursors"
         
-        # Utilities
+        # System utilities
         "caffeine-ng"
         "downgrade"
         "timeshift"
-        "visual-studio-code-bin"
-        
-        # Additional tools
-        "slack-desktop"
-        "discord"
-        "spotify"
     )
     
     # Install AUR packages one by one to handle failures gracefully
@@ -472,132 +460,13 @@ configure_i3() {
     
     # Create basic i3 config if it doesn't exist
     if [[ ! -f "$i3_config_dir/config" ]]; then
-        cat > "$i3_config_dir/config" << 'EOF'
-# i3 config file (v4)
-set $mod Mod4
-
-# Font for window titles and bar
-font pango:DejaVu Sans Mono 8
-
-# Use Mouse+$mod to drag floating windows
-floating_modifier $mod
-
-# Start a terminal
-bindsym $mod+Return exec i3-sensible-terminal
-
-# Kill focused window
-bindsym $mod+Shift+q kill
-
-# Start rofi (program launcher)
-bindsym $mod+d exec rofi -show run
-
-# Change focus
-bindsym $mod+j focus left
-bindsym $mod+k focus down
-bindsym $mod+l focus up
-bindsym $mod+semicolon focus right
-
-# Move focused window
-bindsym $mod+Shift+j move left
-bindsym $mod+Shift+k move down
-bindsym $mod+Shift+l move up
-bindsym $mod+Shift+semicolon move right
-
-# Split in horizontal orientation
-bindsym $mod+h split h
-
-# Split in vertical orientation
-bindsym $mod+v split v
-
-# Enter fullscreen mode
-bindsym $mod+f fullscreen toggle
-
-# Change container layout
-bindsym $mod+s layout stacking
-bindsym $mod+w layout tabbed
-bindsym $mod+e layout toggle split
-
-# Toggle tiling / floating
-bindsym $mod+Shift+space floating toggle
-
-# Change focus between tiling / floating windows
-bindsym $mod+space focus mode_toggle
-
-# Focus the parent container
-bindsym $mod+a focus parent
-
-# Define workspaces
-set $ws1 "1"
-set $ws2 "2"
-set $ws3 "3"
-set $ws4 "4"
-set $ws5 "5"
-set $ws6 "6"
-set $ws7 "7"
-set $ws8 "8"
-set $ws9 "9"
-set $ws10 "10"
-
-# Switch to workspace
-bindsym $mod+1 workspace $ws1
-bindsym $mod+2 workspace $ws2
-bindsym $mod+3 workspace $ws3
-bindsym $mod+4 workspace $ws4
-bindsym $mod+5 workspace $ws5
-bindsym $mod+6 workspace $ws6
-bindsym $mod+7 workspace $ws7
-bindsym $mod+8 workspace $ws8
-bindsym $mod+9 workspace $ws9
-bindsym $mod+0 workspace $ws10
-
-# Move focused container to workspace
-bindsym $mod+Shift+1 move container to workspace $ws1
-bindsym $mod+Shift+2 move container to workspace $ws2
-bindsym $mod+Shift+3 move container to workspace $ws3
-bindsym $mod+Shift+4 move container to workspace $ws4
-bindsym $mod+Shift+5 move container to workspace $ws5
-bindsym $mod+Shift+6 move container to workspace $ws6
-bindsym $mod+Shift+7 move container to workspace $ws7
-bindsym $mod+Shift+8 move container to workspace $ws8
-bindsym $mod+Shift+9 move container to workspace $ws9
-bindsym $mod+Shift+0 move container to workspace $ws10
-
-# Reload the configuration file
-bindsym $mod+Shift+c reload
-
-# Restart i3 inplace
-bindsym $mod+Shift+r restart
-
-# Exit i3
-bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
-
-# Resize window mode
-mode "resize" {
-        bindsym j resize shrink width 10 px or 10 ppt
-        bindsym k resize grow height 10 px or 10 ppt
-        bindsym l resize shrink height 10 px or 10 ppt
-        bindsym semicolon resize grow width 10 px or 10 ppt
-
-        bindsym Return mode "default"
-        bindsym Escape mode "default"
-}
-
-bindsym $mod+r mode "resize"
-
-# Status bar
-bar {
-        status_command i3blocks
-}
-
-# Auto-start applications
-exec --no-startup-id picom -b
-exec --no-startup-id dunst
-exec --no-startup-id feh --bg-scale ~/Pictures/wallpaper.jpg
-EOF
-        info_print "Created basic i3 configuration"
+        info_print "Creating i3 configuration..."
+        # Use i3-config-wizard to generate default config
+        i3-config-wizard
+        info_print "i3 configuration created"
+    else
+        info_print "i3 configuration already exists"
     fi
-    
-    info_print "i3 configuration completed"
 }
 
 # Final system optimization
@@ -628,7 +497,7 @@ POST-INSTALLATION SETUP
 ${RESET}"
     
     info_print "Starting Arch Linux post-installation setup..."
-    info_print "This script will install a complete desktop environment"
+    info_print "This script will install essential desktop components and tools"
     
     # Perform checks
     check_root
@@ -665,10 +534,12 @@ ${RESET}"
     info_print "Default login: Use the user account you created during installation"
     info_print "To start GUI: System will auto-start, or run 'startx' manually"
     echo
-    warning_print "Don't forget to:"
-    warning_print "• Set up your firewall rules if needed"
-    warning_print "• Configure your network connections"
-    warning_print "• Install additional software as needed"
+    warning_print "Additional software you may want to install later:"
+    warning_print "• Video drivers: xf86-video-intel, xf86-video-amdgpu, nvidia"
+    warning_print "• Media players: vlc, mpv"
+    warning_print "• Image editing: gimp, inkscape"
+    warning_print "• Code editors: vim, neovim, code (VS Code)"
+    warning_print "• Communication: discord, slack-desktop"
     echo
     input_print "Press Enter to finish..."
     read -r
