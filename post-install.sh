@@ -237,7 +237,6 @@ configure_laptop() {
             "power-profiles-daemon"
             "powertop"
             "acpi"
-            "tlp"
             "bluez"
             "bluez-utils"
         )
@@ -249,7 +248,7 @@ configure_laptop() {
         done
         
         # Enable laptop services
-        sudo systemctl enable tlp.service
+        sudo systemctl enable power-profiles-daemon.service
         sudo systemctl enable bluetooth.service
         
         # Configure hibernation if swapfile exists
