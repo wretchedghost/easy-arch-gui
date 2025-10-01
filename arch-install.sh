@@ -371,12 +371,12 @@ preflight_checks() {
 # Welcome screen
 echo -ne "${BOLD}${BYELLOW}
 =============================================================================================================
-███████╗ █████╗ ███████╗██╗   ██╗      █████╗ ██████╗  ██████╗██╗  ██╗      ███████╗██╗  ██╗████████╗██╗  ██╗
-██╔════╝██╔══██╗██╔════╝╚██╗ ██╔╝     ██╔══██╗██╔══██╗██╔════╝██║  ██║      ██╔════╝╚██╗██╔╝╚══██╔══╝██║  ██║
-█████╗  ███████║███████╗ ╚████╔╝█████╗███████║██████╔╝██║     ███████║█████╗█████╗   ╚███╔╝    ██║   ███████║
-██╔══╝  ██╔══██║╚════██║  ╚██╔╝ ╚════╝██╔══██║██╔══██╗██║     ██╔══██║╚════╝██╔══╝   ██╔██╗    ██║   ╚════██║
-███████╗██║  ██║███████║   ██║        ██║  ██║██║  ██║╚██████╗██║  ██║      ███████╗██╔╝ ██╗   ██║        ██║
-╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝        ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝      ╚══════╝╚═╝  ╚═╝   ╚═╝        ╚═╝
+█████╗ ██████╗ ███████╗██╗   ██╗      █████╗ ██████╗  ██████╗██╗  ██╗      ███████╗██╗  ██╗████████╗██╗  ██╗
+██╔══██╗██╔══██╗██╔════╝╚██╗ ██╔╝     ██╔══██╗██╔══██╗██╔════╝██║  ██║      ██╔════╝╚██╗██╔╝╚══██╔══╝██║  ██║
+███████║██████╔╝███████╗ ╚████╔╝█████╗███████║██████╔╝██║     ███████║█████╗███████╗ ╚███╔╝    ██║   ███████║
+██╔══██║██╔══██╗╚════██║  ╚██╔╝ ╚════╝██╔══██║██╔══██╗██║     ██╔══██║╚════╝╚════██║ ██╔██╗    ██║   ╚════██║
+██║  ██║██║  ██║███████║   ██║        ██║  ██║██║  ██║╚██████╗██║  ██║      ███████║██╔╝ ██╗   ██║        ██║
+╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝        ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝      ╚══════╝╚═╝  ╚═╝   ╚═╝        ╚═╝
 =============================================================================================================
 ${RESET}"
 
@@ -402,12 +402,64 @@ info_print "=== CONFIGURATION PHASE ==="
 until keyboard_selector; do : ; done
 timedatectl set-ntp true
 
-# Disk selection
+# Disk selection with detailed information
 info_print "Available disks:"
+echo
+# Display detailed disk information
+for disk in $(lsblk -dpnoNAME | grep -P "/dev/(sd|nvme|vd|mmc)"); do
+    size=$(lsblk -dnoSIZE "$disk" 2>/dev/null)
+    model=$(lsblk -dnoMODEL "$disk" 2>/dev/null | sed 's/ *$//')
+    vendor=$(lsblk -dnoVENDOR "$disk" 2>/dev/null | sed 's/ *$//')
+    
+    # For NVMe devices, get model differently
+    if [[ "$disk" == /dev/nvme* ]]; then
+        model=$(nvme list 2>/dev/null | grep "$(basename "$disk")" | awk '{for(i=3;i<=NF-4;i++) printf "%s ", $i}' | sed 's/ *$//')
+        if [[ -z "$model" ]]; then
+            model=$(cat /sys/block/$(basename "$disk")/device/model 2>/dev/null | sed 's/ *$//' || echo "NVMe Drive")
+        fi
+    fi
+    
+    # Combine vendor and model if both exist
+    if [[ -n "$vendor" ]] && [[ -n "$model" ]]; then
+        desc="$vendor $model"
+    elif [[ -n "$model" ]]; then
+        desc="$model"
+    elif [[ -n "$vendor" ]]; then
+        desc="$vendor"
+    else
+        desc="Unknown Device"
+    fi
+    
+    echo -e "  ${BOLD}$disk${RESET} - ${BGREEN}${size:-Unknown size}${RESET} - ${desc}"
+done
+echo
+
 PS3="Select disk number: "
 select ENTRY in $(lsblk -dpnoNAME | grep -P "/dev/(sd|nvme|vd|mmc)"); do
     DISK="$ENTRY"
-    info_print "Selected disk: $DISK"
+    size=$(lsblk -dnoSIZE "$DISK" 2>/dev/null)
+    model=$(lsblk -dnoMODEL "$DISK" 2>/dev/null | sed 's/ *$//')
+    vendor=$(lsblk -dnoVENDOR "$DISK" 2>/dev/null | sed 's/ *$//')
+    
+    # For NVMe devices
+    if [[ "$DISK" == /dev/nvme* ]]; then
+        model=$(nvme list 2>/dev/null | grep "$(basename "$DISK")" | awk '{for(i=3;i<=NF-4;i++) printf "%s ", $i}' | sed 's/ *$//')
+        if [[ -z "$model" ]]; then
+            model=$(cat /sys/block/$(basename "$DISK")/device/model 2>/dev/null | sed 's/ *$//' || echo "NVMe Drive")
+        fi
+    fi
+    
+    if [[ -n "$vendor" ]] && [[ -n "$model" ]]; then
+        desc="$vendor $model"
+    elif [[ -n "$model" ]]; then
+        desc="$model"
+    elif [[ -n "$vendor" ]]; then
+        desc="$vendor"
+    else
+        desc="Unknown Device"
+    fi
+    
+    info_print "Selected: $DISK ($size, $desc)"
     break
 done
 
