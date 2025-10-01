@@ -142,9 +142,10 @@ install_official_packages() {
         "ranger"
         
         # Terminal and shell tools
+        "urxvt-perls"
         "tmux"
         "htop"
-        "neofetch"
+        "screenfetch"
         "tree"
         "unzip"
         "zip"
@@ -173,6 +174,7 @@ install_official_packages() {
         "ttf-dejavu"
         "ttf-liberation"
         "ttf-font-awesome"
+        "woff2-font-awesome"
         "noto-fonts"
         "noto-fonts-emoji"
         
@@ -205,11 +207,6 @@ install_aur_packages() {
     info_print "Installing AUR packages..."
     
     local aur_packages=(
-        # Themes and icons
-        "vimix-gtk-themes"
-        "vimix-icon-theme"
-        "vimix-cursors"
-        
         # System utilities
         "caffeine-ng"
         "downgrade"
@@ -254,6 +251,70 @@ configure_laptop() {
         # Enable laptop services
         sudo systemctl enable tlp.service
         sudo systemctl enable bluetooth.service
+        
+        # Configure hibernation if swapfile exists
+        if [[ -f /.swapfile ]]; then
+            info_print "Configuring hibernation support..."
+            
+            # Get swapfile offset
+            SWAP_OFFSET=$(sudo filefrag -v /.swapfile | awk 'NR==4 {print $4}' | sed 's/\.\.//')
+            
+            # Get root device UUID (for the device containing the swapfile)
+            ROOT_UUID=$(findmnt -no UUID /)
+            
+            if [[ -n "$SWAP_OFFSET" ]] && [[ -n "$ROOT_UUID" ]]; then
+                info_print "Adding hibernation parameters to GRUB..."
+                
+                # Backup grub config
+                sudo cp /etc/default/grub /etc/default/grub.bak
+                
+                # Add resume parameters to GRUB if not already present
+                if ! grep -q "resume=" /etc/default/grub; then
+                    sudo sed -i "s/^GRUB_CMDLINE_LINUX=\"/&resume=UUID=$ROOT_UUID resume_offset=$SWAP_OFFSET /" /etc/default/grub
+                else
+                    warning_print "Resume parameters already present in GRUB config"
+                fi
+                
+                # Add resume hook to mkinitcpio.conf if not already present
+                if ! grep -q "resume" /etc/mkinitcpio.conf; then
+                    info_print "Adding resume hook to mkinitcpio..."
+                    sudo sed -i 's/filesystems fsck/filesystems resume fsck/' /etc/mkinitcpio.conf
+                    
+                    # Regenerate initramfs
+                    info_print "Regenerating initramfs..."
+                    sudo mkinitcpio -P
+                else
+                    warning_print "Resume hook already present in mkinitcpio.conf"
+                fi
+                
+                # Update GRUB configuration
+                info_print "Updating GRUB configuration..."
+                sudo grub-mkconfig -o /boot/grub/grub.cfg
+                
+                # Configure lid switch behavior for hibernation
+                info_print "Configuring lid switch to trigger hibernation..."
+                sudo mkdir -p /etc/systemd/logind.conf.d/
+                cat << EOF | sudo tee /etc/systemd/logind.conf.d/lid-hibernate.conf > /dev/null
+[Login]
+HandleLidSwitch=hibernate
+HandleLidSwitchExternalPower=hibernate
+HandleLidSwitchDocked=hibernate
+EOF
+                
+                # Restart logind to apply changes
+                info_print "Restarting systemd-logind to apply lid switch settings..."
+                sudo systemctl restart systemd-logind
+                
+                info_print "Hibernation support configured successfully"
+                info_print "The laptop will now hibernate when the lid is closed"
+                info_print "You can test hibernation with: systemctl hibernate"
+            else
+                error_print "Failed to get swapfile offset or UUID, hibernation not configured"
+            fi
+        else
+            warning_print "No swapfile found at /.swapfile, skipping hibernation setup"
+            warning_print "If you want hibernation, create a swapfile and re-run this script"
+        fi
         
         info_print "Laptop configuration completed"
     fi
