@@ -128,8 +128,7 @@ install_official_packages() {
         "xautolock"
         
         # Display manager
-        "lightdm"
-        "lightdm-gtk-greeter"
+        "lightdm-slick-greeter"
         
         # File management
         "thunar"
@@ -416,8 +415,17 @@ configure_dotfiles() {
 configure_services() {
     info_print "Configuring system services..."
     
-    # Enable display manager
-    sudo systemctl enable lightdm.service
+    # Ask about display manager
+    input_print "Enable LightDM display manager for graphical login? [y/N]: "
+    read -r enable_dm
+    
+    if [[ "${enable_dm,,}" =~ ^(yes|y)$ ]]; then
+        sudo systemctl enable lightdm.service
+        info_print "LightDM enabled - system will boot to graphical login"
+    else
+        info_print "LightDM not enabled - use 'startx' to start X session"
+        info_print "To enable later, run: sudo systemctl enable lightdm.service"
+    fi
     
     # Enable audio
     systemctl --user enable pipewire.service
@@ -518,12 +526,10 @@ configure_i3() {
     local i3_config_dir="$HOME/.config/i3"
     mkdir -p "$i3_config_dir"
     
-    # Create basic i3 config if it doesn't exist
+    # Check if i3 config already exists
     if [[ ! -f "$i3_config_dir/config" ]]; then
-        info_print "Creating i3 configuration..."
-        # Use i3-config-wizard to generate default config
-        i3-config-wizard
-        info_print "i3 configuration created"
+        info_print "No i3 config found. You can generate one after first login with: i3-config-wizard"
+        info_print "Or i3 will prompt you to create one on first start"
     else
         info_print "i3 configuration already exists"
     fi
